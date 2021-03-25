@@ -1,5 +1,3 @@
-export { Controls }
-
 class Controls {
 	constructor(target) {
 		this.target = target
@@ -25,22 +23,19 @@ class Controls {
 			return
 		}
 		events.forEach(event => {
-			this.target.addEventListener(event, callback)
+			console.log(event)
+			this.target.addEventListener(event, e => callback.call(this, this.getMousePos(e)))
 		})
 	}
 	mouseMove(callback) {
-		this.listen(["mousemove", "touchmove"], e => {
-			callback(this.getMousePos(e))
-		})
+		this.listen(["mousemove", "touchmove"], callback)
 	}
 	mouseDown(callback) {
-		this.listen(["mousedown", "touchstart"], e => {
-			callback(this.getMousePos(e))
-		})
+		this.listen(["mousedown", "touchstart"], callback)
 	}
 	mouseUp(callback) {
-		this.listen(["mouseup", "touchend"], e => {
-			callback(this.getMousePos(e))
-		})
+		this.listen(["mouseup", "touchend"], callback)
 	}
 }
+
+export default Controls

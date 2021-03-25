@@ -1,4 +1,6 @@
-import { DataSet } from "./../../jslib/dataset.js"
+import { DataSet } from "./dataset.js"
+import { Color } from "./color.js"
+export { Screen }
 
 class Screen extends DataSet {
 
@@ -10,6 +12,7 @@ class Screen extends DataSet {
 	setConfig(config) {
 		this.set("config", Object.assign({
 			"container": "body",
+			"imageRendering": "auto",
 			"width": 100,
 			"height": 100,
 			"size": 5,
@@ -18,39 +21,97 @@ class Screen extends DataSet {
 	init() {
 		this.setCanvas()
 		this.setLayer(0)
+		this.set("stroke", "#000")
+		this.set("fill", "#fff")
 	}
 	setCanvas() {
 		this.cnv = document.createElement("canvas")
-		this.cnv.width = this.config.width
-		this.cnv.height = this.config.height
-		this.cnv.style.width = this.config.width * this.config.size + "px"
-		this.cnv.style.height = this.config.height * this.config.size + "px"
-		this.cnv.style.imageRendering = "pixelated"
+		this.cnv.width = this.get("config.width")
+		this.cnv.height = this.get("config.height")
+		this.cnv.style.width = this.get("config.width") * this.get("config.size") + "px"
+		this.cnv.style.height = this.get("config.height") * this.get("config.size") + "px"
+		this.cnv.style.imageRendering = this.get("config.imageRendering", "auto")
 		this.ctx = this.cnv.getContext("2d")
 		document.querySelector(this.config.container).appendChild(this.cnv)
 	}
 	setLayer(layer) {
 		this.set("layer", parseInt(layer))
 	}
-	setColor(color) {
-		if (color) {
-			this.set("color", color)
-			this.ctx.strokeStyle = color
-		}
+	setStroke(color) {
+		this.ctx.strokeStyle = color ? color : this.get("stroke")
+	}
+	setFill(color) {
+		this.ctx.fillStyle = color ? color : this.get("fill")
 	}
 	line(x1, y1, x2, y2, color = false) {
-		this.setColor(color)
+		this.setStroke(color)
 		this.ctx.beginPath()
 		this.ctx.moveTo(x1, y1)
 		this.ctx.lineTo(x2, y2)
 		this.ctx.stroke()
+		this.setStroke(false)
+	}
+	polygon(vertices, color = false, fill = false, closed = false) {
+		this.setStroke(color)
+		this.setFill(fill)
+		this.ctx.beginPath()
+		vertices.forEach((vertex, index) => {
+			if (index) {
+				this.ctx.lineTo(vertex.x, vertex.y)
+			} else {
+				this.ctx.moveTo(vertex.x, vertex.y)
+			}
+		})
+		if (closed) {
+			// this.ctx.lineTo(vertices[0].x, vertices[0].y)
+			this.ctx.closePath()
+		}
+		this.ctx.stroke()
+		this.setStroke(false)
+		this.setFill(false)
+	}
+	rect(x, y, w, h, stroke = false, fill = false) {
+		this.setStroke(stroke)
+		this.setFill(fill)
+		this.ctx.beginPath()
+		this.ctx.rect(x, y, w, h)
+		this.ctx.stroke()
+		if (fill) {
+			this.ctx.fill()
+		}
+		this.setStroke(false)
+		this.setFill(false)
+	}
+	ellipse(x, y, rx, ry, stroke = false, fill = false) {
+		this.setStroke(stroke)
+		this.setFill(fill)
+		this.ctx.beginPath()
+		this.ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI, false)
+		this.ctx.stroke()
+		if (fill) {
+			this.ctx.fill()
+		}
+		this.setStroke(false)
+		this.setFill(false)
+	}
+	circle(x, y, r, stroke = false, fill = false) {
+		this.ellipse(x, y, r, r, stroke, fill)
+	}
+	draw(shape) {
+		if (shape.vertices) {
+			this.polygon(shape.vertices, shape.color, shape.background, shape.closed)
+		} else if (shape.line) {
+			this.line(shape.line[0].x, shape.line[0].y, shape.line[1].x, shape.line[1].y, shape.color)
+		} else if (shape.rect) {
+			this.rect(shape.rect.pos.x, shape.rect.pos.y, shape.rect.size.x, shape.rect.size.y, shape.color, shape.background)
+		} else if (shape.ellipse) {
+			if (typeof shape.ellipse.size == "number") {
+				shape.ellipse.size = {
+					"x": shape.ellipse.size,
+					"y": shape.ellipse.size
+				}
+			}
+			this.ellipse(shape.ellipse.pos.x, shape.ellipse.pos.y, shape.ellipse.size.x, shape.ellipse.size.y, shape.color, shape.background)
+		}
 	}
 }
-
-screen = new Screen({
-	"width": 100,
-	"height": 100,
-	"size": 4
-})
-
-screen.line(10, 10, 90, 90, "#000")
