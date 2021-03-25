@@ -26,17 +26,59 @@ class Matrix {
 		}
 		return { col, row }
 	}
+	fromArray(array) {
+		if (Array.isArray(array[0])) {
+			this.update((col, row) => array[col][row])
+		} else {
+			this.update((col, row, i) => array[i])
+		}
+	}
 	forEach(callback) {
 		for (let i = 0; i < this.cells.length; i++) {
 			const { col, row } = this.indexToPos(i)
-			callback.call(this, col, row, this.cells[i])
+			callback.call(this, col, row, this.cells[i], i)
 		}
 	}
 	update(callback) {
 		for (let i = 0; i < this.cells.length; i++) {
 			const { col, row } = this.indexToPos(i)
-			this.cells[i] = callback.call(this, col, row)
+			this.cells[i] = callback.call(this, col, row, i)
 		}
+	}
+	flip(axis) {
+		if (axis !== "x"  && axis !== "y") {
+			return
+		}
+		const cells = new Array(this.cols * this.rows)
+		this.forEach((col, row, value, i) => {
+			const _col = (axis === "x") ? col : this.cols - 1 - col
+			const _row = (axis === "y") ? row : this.rows - 1 - row
+			const _i = this.indexFromPos(_col, _row)
+			cells[_i] = value
+		})
+		this.fromArray(cells)
+	}
+	transpose() {
+		const cells = new Array(this.cols * this.rows)
+		this.forEach((col, row, value, i) => {
+			const _i = this.indexFromPos(row, col)
+			cells[_i] = value
+		})
+		const buff = this.cols
+		this.cols = this.rows
+		this.rows = buff
+		this.fromArray(cells)
+	}
+	rotate(dir) {
+		if (dir !== "cw" && dir !== "ccw") {
+			return
+		}
+		const flips = {
+			cw: "y",
+			ccw: "x"
+		}
+		this.transpose()
+		this.flip(flips[dir])
 	}
 	find(value) {
 		for (let i = 0; i < this.cells.length; i++) {

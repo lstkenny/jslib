@@ -4,28 +4,45 @@ class Controls {
 		this.target.addEventListener("resize", this.resize)
 	}
 	resize() {
-		this.target._boundingClientRect = false
+		this.target._bcr = false
 	}
 	getMousePos(e) {
-		if (!this.target._boundingClientRect) {
-			this.target._boundingClientRect = this.target.getBoundingClientRect()
+		if (!this.target._bcr) {
+			this.target._bcr = this.target.getBoundingClientRect()
 		}
 		return {
-			"x": e.clientX - this.target._boundingClientRect.left,
-			"y": e.clientY - this.target._boundingClientRect.top
+			"x": e.clientX - this.target._bcr.left,
+			"y": e.clientY - this.target._bcr.top
 		}
 	}
-	listen(events, callback) {
-		if (typeof events == "string") {
-			events = [events]
+	getArguments(event, e) {
+		switch (event) {
+			case "mousemove":
+			case "mousedown":
+			case "mouseup":
+			case "touchmove":
+			case "touchstart":
+			case "touchend":
+				return [this.getMousePos(e), e]
+				break
+			default:
+				return [e]
 		}
-		if (!Array.isArray(events)) {
+	}
+	listen(eventsList, callback) {
+		if (typeof eventsList == "string") {
+			eventsList = [eventsList]
+		}
+		if (!Array.isArray(eventsList)) {
 			return
 		}
-		events.forEach(event => {
-			console.log(event)
-			this.target.addEventListener(event, e => callback.call(this, this.getMousePos(e)))
-		})
+		eventsList.forEach(eventName => 
+			this.target.addEventListener(eventName, e => 
+				callback.apply(null, 
+					this.getArguments(eventName, e)
+				)
+			)
+		)
 	}
 	mouseMove(callback) {
 		this.listen(["mousemove", "touchmove"], callback)
@@ -35,6 +52,9 @@ class Controls {
 	}
 	mouseUp(callback) {
 		this.listen(["mouseup", "touchend"], callback)
+	}
+	wheel(callback) {
+		this.listen(["wheel"], callback)
 	}
 }
 
