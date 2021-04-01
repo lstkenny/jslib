@@ -1,6 +1,5 @@
 import { DataSet } from "./dataset.js"
 import { Color } from "./color.js"
-export { Screen }
 
 class Screen extends DataSet {
 
@@ -115,3 +114,4 @@ class Screen extends DataSet {
 		}
 	}
 }
+export default Screen

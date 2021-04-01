@@ -1,5 +1,3 @@
-export { SRand }
-
 class SRand {
 	constructor() {
 		this.seed(arguments[0] || Date.now())
@@ -63,3 +61,4 @@ class SRand {
 		return arr
 	}
 }
+export default SRand

@@ -1,7 +1,4 @@
-export { Color }
-
 class Color {
-
 	constructor() {
 		this.setColor.apply(this, arguments)
 	}
@@ -86,3 +83,4 @@ class Color {
 		return "rgba(" + this.r + ", " + this.g + ", " + this.b + ", " + this.a + ")"
 	}
 }
+export default Color

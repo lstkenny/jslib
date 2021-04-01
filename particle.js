@@ -1,4 +1,3 @@
-export { Particle }
 import { Vec2 } from "./vec2.js"
 
 class Particle {
@@ -90,3 +89,4 @@ class Particle {
 		ctx.restore()
 	}
 }
+export default Particle

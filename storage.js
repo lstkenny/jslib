@@ -1,12 +1,11 @@
-export { Storage }
-
 class Storage {
-
 	constructor() {
 		this.isChromeStorage = (typeof chrome != "undefined" && chrome.storage)
 	}
 	get(key, deflt) {
-		deflt = deflt || null
+		if (typeof deflt === "undefined") {
+			deflt = null
+		}
 		return new Promise((resolve, reject) => {
 			if (this.isChromeStorage) {
 				chrome.storage.sync.get([key], result => {
@@ -53,3 +52,4 @@ class Storage {
 		})
 	}
 }
+export default Storage

@@ -1,5 +1,3 @@
-export { DomManager }
-
 class DomManager {
 	elementAttrDataSet(element, attr, data) {
 		for (let key in data) {
@@ -78,3 +76,4 @@ class DomManager {
 		}
 	}
 }
+export default DomManager

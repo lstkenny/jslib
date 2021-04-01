@@ -1,7 +1,4 @@
-export { Cookie }
-
 class Cookie {
-
 	constructor(url) {
 		this.url = url
 		this.isChromeCookie = (typeof chrome != "undefined" && chrome.cookies)
@@ -83,3 +80,4 @@ class Cookie {
 		})
 	}
 }
+export default Cookie

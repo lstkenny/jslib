@@ -1,5 +1,3 @@
-export { DataSet }
-
 class DataSet {
 	constructor(data = {}) {
 		this.assign(data)
@@ -59,3 +57,4 @@ class DataSet {
 		}
 	}
 }
+export default DataSet
