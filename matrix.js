@@ -7,9 +7,9 @@ class Matrix {
 	invalidPos(col, row) {
 		return (
 			col < 0 ||
-			col >= this.cols.length ||
+			col >= this.cols ||
 			row < 0 || 
-			row >= this.rows.length
+			row >= this.rows
 		)
 	}
 	indexFromPos(col, row) {
@@ -42,7 +42,7 @@ class Matrix {
 	update(callback) {
 		for (let i = 0; i < this.cells.length; i++) {
 			const { col, row } = this.indexToPos(i)
-			this.cells[i] = callback.call(this, col, row, i)
+			this.cells[i] = callback.call(this, col, row, this.cells[i], i)
 		}
 	}
 	flip(axis) {
@@ -57,6 +57,14 @@ class Matrix {
 			cells[_i] = value
 		})
 		this.fromArray(cells)
+	}
+	shuffle() {
+		for (let i = 0; i < this.cells.length; i++) {
+			const j = Math.floor(Math.random() * this.cells.length)
+			const buff = this.cells[i]
+			this.cells[i] = this.cells[j]
+			this.cells[j] = buff
+		}
 	}
 	transpose() {
 		const cells = new Array(this.cols * this.rows)
@@ -80,9 +88,13 @@ class Matrix {
 		this.transpose()
 		this.flip(flips[dir])
 	}
-	find(value) {
+	find(callback) {
+		if (typeof callback !== "function") {
+			const value = callback
+			callback = element => value === element
+		}
 		for (let i = 0; i < this.cells.length; i++) {
-			if (this.cells[i] === value) {
+			if (callback(this.cells[i])) {
 				return this.indexToPos(i)
 			}
 		}
