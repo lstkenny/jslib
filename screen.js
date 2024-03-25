@@ -1,5 +1,5 @@
-import { DataSet } from "./dataset.js"
-import { Color } from "./color.js"
+import DataSet from "./dataset.js"
+import Color from "./color.js"
 
 class Screen extends DataSet {
 
@@ -37,22 +37,26 @@ class Screen extends DataSet {
 		this.set("layer", parseInt(layer))
 	}
 	setStroke(color) {
-		this.ctx.strokeStyle = color ? color : this.get("stroke")
+		this.ctx.strokeStyle = color || this.get("stroke")
 	}
 	setFill(color) {
-		this.ctx.fillStyle = color ? color : this.get("fill")
+		this.ctx.fillStyle = color || this.get("fill")
+	}
+	clear() {
+		this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height)
 	}
 	line(x1, y1, x2, y2, color = false) {
 		this.setStroke(color)
 		this.ctx.beginPath()
 		this.ctx.moveTo(x1, y1)
 		this.ctx.lineTo(x2, y2)
+		this.ctx.closePath()
 		this.ctx.stroke()
 		this.setStroke(false)
 	}
 	polygon(vertices, color = false, fill = false, closed = false) {
 		this.setStroke(color)
-		this.setFill(fill)
+		this.setFill(fill || color)
 		this.ctx.beginPath()
 		vertices.forEach((vertex, index) => {
 			if (index) {
@@ -66,30 +70,34 @@ class Screen extends DataSet {
 			this.ctx.closePath()
 		}
 		this.ctx.stroke()
+		this.ctx.fill()
 		this.setStroke(false)
 		this.setFill(false)
 	}
 	rect(x, y, w, h, stroke = false, fill = false) {
+		x = Math.round(x) - 0.5
+		y = Math.round(y) - 0.5
 		this.setStroke(stroke)
-		this.setFill(fill)
+		this.setFill(fill || stroke)
 		this.ctx.beginPath()
 		this.ctx.rect(x, y, w, h)
+		this.ctx.closePath()
 		this.ctx.stroke()
-		if (fill) {
-			this.ctx.fill()
-		}
+		this.ctx.fill()
 		this.setStroke(false)
 		this.setFill(false)
 	}
+	point(x, y, stroke) {
+		this.rect(x, y, 1, 1, stroke)
+	}
 	ellipse(x, y, rx, ry, stroke = false, fill = false) {
 		this.setStroke(stroke)
-		this.setFill(fill)
+		this.setFill(fill || stroke)
 		this.ctx.beginPath()
 		this.ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI, false)
+		this.ctx.closePath()
 		this.ctx.stroke()
-		if (fill) {
-			this.ctx.fill()
-		}
+		this.ctx.fill()
 		this.setStroke(false)
 		this.setFill(false)
 	}
@@ -112,6 +120,14 @@ class Screen extends DataSet {
 			}
 			this.ellipse(shape.ellipse.pos.x, shape.ellipse.pos.y, shape.ellipse.size.x, shape.ellipse.size.y, shape.color, shape.background)
 		}
+	}
+	text(text, x, y, fill = false) {
+		this.setFill(fill)
+		this.ctx.fillText(text, x, y)
+		this.setFill(false)
+	}
+	image(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+		this.ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
 	}
 }
 export default Screen

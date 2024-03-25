@@ -1,6 +1,6 @@
 class Controls {
 	constructor(target) {
-		this.target = target
+		this.target = target || document.body
 		this.target.addEventListener("resize", this.resize)
 	}
 	resize() {
@@ -10,13 +10,16 @@ class Controls {
 		if (!this.target._bcr) {
 			this.target._bcr = this.target.getBoundingClientRect()
 		}
+		const coords = e.touches?.[0] || e
 		return {
-			"x": e.clientX - this.target._bcr.left,
-			"y": e.clientY - this.target._bcr.top
+			x: coords.clientX - this.target._bcr.left,
+			y: coords.clientY - this.target._bcr.top
 		}
 	}
 	getArguments(event, e) {
 		switch (event) {
+			case "keydown":
+				return [e.code, e]
 			case "mousemove":
 			case "mousedown":
 			case "mouseup":
@@ -24,12 +27,11 @@ class Controls {
 			case "touchstart":
 			case "touchend":
 				return [this.getMousePos(e), e]
-				break
 			default:
 				return [e]
 		}
 	}
-	listen(eventsList, callback) {
+	listen(eventsList, callback, target) {
 		if (typeof eventsList == "string") {
 			eventsList = [eventsList]
 		}
@@ -37,24 +39,44 @@ class Controls {
 			return
 		}
 		eventsList.forEach(eventName => 
-			this.target.addEventListener(eventName, e => 
+			(target || this.target).addEventListener(eventName, e => 
 				callback.apply(null, 
 					this.getArguments(eventName, e)
 				)
 			)
 		)
 	}
-	mouseMove(callback) {
-		this.listen(["mousemove", "touchmove"], callback)
+	keyDown(...args) {
+		this.listen("keydown", ...args)
 	}
-	mouseDown(callback) {
-		this.listen(["mousedown", "touchstart"], callback)
+	mouseMove(...args) {
+		this.listen(["mousemove", "touchmove"], ...args)
 	}
-	mouseUp(callback) {
-		this.listen(["mouseup", "touchend"], callback)
+	mouseDown(...args) {
+		this.listen(["mousedown", "touchstart"], ...args)
 	}
-	wheel(callback) {
-		this.listen(["wheel"], callback)
+	mouseUp(...args) {
+		this.listen(["mouseup", "touchend"], ...args)
+	}
+	wheel(...args) {
+		this.listen(["wheel"], ...args)
+	}
+	handleTouchStart(pos) {
+		this.touchStart = pos
+	}
+	handleTouchMove(pos, callback) {
+		if (!this.touchStart?.x || !this.touchStart?.y) {
+			return
+		}
+		callback({
+			x: this.touchStart.x - pos.x,
+			y: this.touchStart.y - pos.y,
+		})
+	}
+	swipe(callback, target) {
+		this.mouseDown(pos => this.handleTouchStart(pos), target)
+		this.mouseMove(pos => this.handleTouchMove(pos, callback, target))
+		this.mouseUp(() => this.touchStart = null, document)
 	}
 }
 

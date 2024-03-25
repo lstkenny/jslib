@@ -30,7 +30,7 @@ class Matrix {
 		if (Array.isArray(array[0])) {
 			this.update((col, row) => array[col][row])
 		} else {
-			this.update((col, row, i) => array[i])
+			this.update((col, row, value, i) => array[i])
 		}
 	}
 	forEach(callback) {
